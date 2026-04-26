@@ -1,0 +1,6 @@
+name: NitroCore
+version: '${project.version}'
+main: de.grimlock.nitromc.Main
+api-version: '1.21'
+author: grimlock
+description: NitroCore plugin managing all core functions.
