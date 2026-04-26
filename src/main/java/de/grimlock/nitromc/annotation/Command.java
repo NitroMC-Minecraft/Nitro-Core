@@ -13,4 +13,5 @@ public @interface Command {
     String usage() default "";
     String permission() default "";
     String[] aliases() default {};
+    int priority() default 0;
 }
