@@ -5,6 +5,7 @@ import de.grimlock.nitromc.database.DatabasePriority;
 import de.grimlock.nitromc.event.AsyncDataIntegrityCheckEvent;
 import de.grimlock.nitromc.event.NitroEventBus;
 import de.grimlock.nitromc.event.PreDataLoadEvent;
+import de.grimlock.nitromc.integration.essentials.EssentialsService;
 import de.grimlock.nitromc.integration.luckperms.LuckPermsService;
 import de.grimlock.nitromc.service.IService;
 import org.bukkit.entity.Player;
@@ -20,14 +21,16 @@ public class NitroPlayerManager implements IService {
 
     private final DatabaseManager databaseManager;
     private final LuckPermsService luckPermsService;
+    private final EssentialsService essentialsService;
     private final NitroEventBus eventBus;
     private final ConcurrentHashMap<UUID, NitroPlayer> players = new ConcurrentHashMap<>();
     private NitroPlayerTable playerTable;
 
     @Inject
-    public NitroPlayerManager(DatabaseManager databaseManager, LuckPermsService luckPermsService, NitroEventBus eventBus) {
+    public NitroPlayerManager(DatabaseManager databaseManager, LuckPermsService luckPermsService, EssentialsService essentialsService, NitroEventBus eventBus) {
         this.databaseManager = databaseManager;
         this.luckPermsService = luckPermsService;
+        this.essentialsService = essentialsService;
         this.eventBus = eventBus;
     }
 
@@ -39,7 +42,10 @@ public class NitroPlayerManager implements IService {
     @Override
     public void onDisable() {
         for (NitroPlayer player : players.values()) {
-            java.util.Map<String, Object> updates = java.util.Map.of("last_join", System.currentTimeMillis());
+            java.util.Map<String, Object> updates = java.util.Map.of(
+                "last_join", System.currentTimeMillis(),
+                "login_count", player.getLoginCount()
+            );
             playerTable.updateMultiple("uuid", player.getUniqueId().toString(), updates).join();
         }
         players.clear();
@@ -57,17 +63,21 @@ public class NitroPlayerManager implements IService {
                 String name = rs.getString("name");
                 long firstJoin = rs.getLong("first_join");
                 long lastJoin = rs.getLong("last_join");
-                return new NitroPlayer(player, luckPermsService, name, firstJoin, lastJoin);
+                long loginCount = rs.getLong("login_count");
+                return new NitroPlayer(player, luckPermsService, essentialsService, name, firstJoin, lastJoin, loginCount);
             })
             .thenAccept(nitroPlayer -> {
                 if (nitroPlayer != null) {
+                    nitroPlayer.incrementLoginCount();
+                    java.util.Map<String, Object> updates = java.util.Map.of("login_count", nitroPlayer.getLoginCount());
+                    playerTable.updateMultiple("uuid", uuid.toString(), updates);
                     players.put(uuid, nitroPlayer);
                     AsyncDataIntegrityCheckEvent loadEvent = new AsyncDataIntegrityCheckEvent(uuid.toString(), nitroPlayer);
                     loadEvent.setValid(true);
                     eventBus.post(loadEvent);
                 } else {
                     long now = System.currentTimeMillis();
-                    NitroPlayer newPlayer = new NitroPlayer(player, luckPermsService, player.getName(), now, now);
+                    NitroPlayer newPlayer = new NitroPlayer(player, luckPermsService, essentialsService, player.getName(), now, now, 1);
                     insertPlayerData(newPlayer);
                 }
             })
@@ -80,7 +90,10 @@ public class NitroPlayerManager implements IService {
     public void unloadPlayer(UUID uuid) {
         NitroPlayer player = players.remove(uuid);
         if (player != null) {
-            java.util.Map<String, Object> updates = java.util.Map.of("last_join", System.currentTimeMillis());
+            java.util.Map<String, Object> updates = java.util.Map.of(
+                "last_join", System.currentTimeMillis(),
+                "login_count", player.getLoginCount()
+            );
             playerTable.updateMultiple("uuid", uuid.toString(), updates);
         }
     }

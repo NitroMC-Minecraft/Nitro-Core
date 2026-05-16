@@ -10,7 +10,9 @@ import de.grimlock.nitromc.database.DatabaseService;
 import de.grimlock.nitromc.event.NitroEventBus;
 import de.grimlock.nitromc.handler.CommandHandler;
 import de.grimlock.nitromc.handler.ListenerHandler;
+import de.grimlock.nitromc.integration.essentials.EssentialsService;
 import de.grimlock.nitromc.integration.luckperms.LuckPermsService;
+import de.grimlock.nitromc.job.JobScheduler;
 import de.grimlock.nitromc.listener.PlayerDataListener;
 import de.grimlock.nitromc.player.NitroPlayerManager;
 import de.grimlock.nitromc.service.IService;
@@ -52,12 +54,17 @@ public class Main extends JavaPlugin {
         startService(EffectService.class);
         startService(MessageService.class);
         startService(LuckPermsService.class);
+        startService(EssentialsService.class);
+        startService(JobScheduler.class);
         startService(NitroPlayerManager.class);
         startService(PlayerDataListener.class);
 
         // Register Commands and Listeners via Reflection
         injector.getInstance(CommandHandler.class).registerCommands("de.grimlock.nitromc");
         injector.getInstance(ListenerHandler.class).registerListeners("de.grimlock.nitromc");
+
+        // Schedule background jobs
+        injector.getInstance(JobScheduler.class).scheduleJobs("de.grimlock.nitromc");
 
         getLogger().info("NitroCore 'God Mode' Architecture enabled!");
     }

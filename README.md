@@ -992,6 +992,22 @@ PlayerData data = cache.getOrLoad("player_" + uuid, uuid ->
 
 Proprietary — Alle Rechte vorbehalten
 
+---
+
+> **⚠️ WICHTIGER DISCLAIMER — NUTZUNGSBEDINGUNGEN**
+>
+> Die Nutzungsrechte an diesem Plugin verfallen automatisch und unverzüglich, sobald der Entwickler das Team verlässt.
+>
+> Ohne ausdrückliche schriftliche Absprache mit **Grimlock Rene Schnitzler** verbleibt das gesamte System — einschließlich aller zugehörigen Dateien, Datenbanken, Konfigurationen und Quellcode-Derivate — ausschließlich im Eigentum von **Grimlock Rene Schnitzler**.
+>
+> Eine Weiternutzung, Modifikation, Weitergabe oder Vervielfältigung nach dem Ausscheiden des Entwicklers ist ohne vorherige Genehmigung nicht gestattet.
+
+> **⚠️ HINWEIS ZUR QUELLCODE-INTEGRITÄT**
+>
+> Dies ist ein **internes System**. Die direkte Veränderung des Quellcodes durch andere Entwickler wird ausdrücklich nicht angeraten.
+>
+> Jegliche Anpassungen, Modifikationen oder Eingriffe in den bestehenden Code müssen **vorher mit Grimlock Rene Schnitzler abgesprochen** werden. Unautorisierte Änderungen können zur Instabilität des Systems führen und sind daher zu vermeiden.
+
 <div align="center">
 
 **Version:** 1.0.0 | **Paper:** 1.21.1 | **Java:** 21+

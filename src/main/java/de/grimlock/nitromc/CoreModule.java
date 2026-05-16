@@ -7,7 +7,9 @@ import de.grimlock.nitromc.database.DatabaseManager;
 import de.grimlock.nitromc.database.DatabasePerformanceMonitor;
 import de.grimlock.nitromc.database.DatabaseService;
 import de.grimlock.nitromc.event.NitroEventBus;
+import de.grimlock.nitromc.integration.essentials.EssentialsService;
 import de.grimlock.nitromc.integration.luckperms.LuckPermsService;
+import de.grimlock.nitromc.job.JobScheduler;
 import de.grimlock.nitromc.listener.PlayerDataListener;
 import de.grimlock.nitromc.player.NitroPlayerManager;
 import de.grimlock.nitromc.player.NitroPlayerTable;
@@ -41,6 +43,8 @@ public class CoreModule extends AbstractModule {
         bind(EffectService.class).asEagerSingleton();
         bind(MessageService.class).asEagerSingleton();
         bind(LuckPermsService.class).asEagerSingleton();
+        bind(EssentialsService.class).asEagerSingleton();
+        bind(JobScheduler.class).asEagerSingleton();
         bind(NitroPlayerManager.class).asEagerSingleton();
         bind(PlayerDataListener.class).asEagerSingleton();
     }
