@@ -15,7 +15,7 @@ Paper 1.21.1 | Java 21+ | MySQL 8.0+ / MariaDB 10.5+ | Production Ready
 - **Paper Server** 1.21.1+
 - **Java 21+**
 - **MySQL 8.0+** oder **MariaDB 10.5+**
-- (Optional) **LuckPerms** für Permission-Features
+- **LuckPerms** für Permission-Features
 
 ### 2. Plugin installieren
 
