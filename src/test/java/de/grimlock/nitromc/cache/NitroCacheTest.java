@@ -23,7 +23,6 @@ class NitroCacheTest {
 
     @Test
     void testAtomicIncrement() {
-        // Since incr uses AtomicLong internally, we should just call it
         long val1 = cache.incr("counter");
         long val2 = cache.incr("counter");
         assertEquals(1, val1);
