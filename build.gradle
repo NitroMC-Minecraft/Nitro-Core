@@ -37,6 +37,7 @@ dependencies {
 }
 
 processResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     expand project.properties
 }
 
@@ -60,7 +61,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/DEIN_ORGANISATIONS_NAME/Nitro-Core")
+            url = uri("https://maven.pkg.github.com/NitroMC-Minecraft/Nitro-Core")
             credentials {
                 username = System.getenv("USERNAME")
                 password = System.getenv("TOKEN")
