@@ -3,6 +3,7 @@ package de.grimlock.nitromc;
 import com.google.inject.AbstractModule;
 import de.grimlock.nitromc.cache.NitroCache;
 import de.grimlock.nitromc.config.ConfigService;
+import de.grimlock.nitromc.database.DatabaseManager;
 import de.grimlock.nitromc.database.DatabasePerformanceMonitor;
 import de.grimlock.nitromc.database.DatabaseService;
 import de.grimlock.nitromc.event.NitroEventBus;
@@ -32,6 +33,7 @@ public class CoreModule extends AbstractModule {
         bind(NitroCache.class).asEagerSingleton();
         bind(DatabasePerformanceMonitor.class).asEagerSingleton();
         bind(DatabaseService.class).asEagerSingleton();
+        bind(DatabaseManager.class).asEagerSingleton();
         bind(DiagnosticsService.class).asEagerSingleton();
         bind(CooldownManager.class).asEagerSingleton();
         bind(EffectService.class).asEagerSingleton();

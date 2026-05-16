@@ -9,14 +9,21 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ConcurrentModificationException;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
 
 @Singleton
 public class ConfigService implements IService {
 
     private final Main plugin;
-    private final Map<String, ConfigFile> configs = new HashMap<>();
+    private final Map<String, ConfigFile> configs = new ConcurrentHashMap<>();
+    private final List<Runnable> reloadListeners = new CopyOnWriteArrayList<>();
 
     @Inject
     public ConfigService(Main plugin) {
@@ -39,17 +46,52 @@ public class ConfigService implements IService {
 
     public void reloadConfigs() {
         configs.values().forEach(ConfigFile::reload);
+        reloadListeners.forEach(Runnable::run);
+    }
+
+    public void addReloadListener(Runnable listener) {
+        reloadListeners.add(listener);
+    }
+
+    public String getString(String configName, String path) {
+        return getConfig(configName).get().getString(path);
+    }
+
+    public String getString(String configName, String path, String def) {
+        return getConfig(configName).get().getString(path, def);
+    }
+
+    public int getInt(String configName, String path) {
+        return getConfig(configName).get().getInt(path);
+    }
+
+    public int getInt(String configName, String path, int def) {
+        return getConfig(configName).get().getInt(path, def);
+    }
+
+    public boolean getBoolean(String configName, String path) {
+        return getConfig(configName).get().getBoolean(path);
+    }
+
+    public boolean getBoolean(String configName, String path, boolean def) {
+        return getConfig(configName).get().getBoolean(path, def);
+    }
+
+    public List<String> getStringList(String configName, String path) {
+        return getConfig(configName).get().getStringList(path);
     }
 
     public static class ConfigFile {
+        private final Main plugin;
         private final File file;
         private FileConfiguration configuration;
 
         public ConfigFile(Main plugin, String name) {
-            if (!plugin.getDataFolder().exists()) {
-                plugin.getDataFolder().mkdirs();
-            }
-            this.file = new File(plugin.getDataFolder(), name + ".yml");
+            this.plugin = plugin;
+            file = new File(plugin.getDataFolder(), name + ".yml");
+
+            file.getParentFile().mkdirs();
+
             if (!file.exists()) {
                 try {
                     if (plugin.getResource(name + ".yml") != null) {
@@ -58,10 +100,26 @@ public class ConfigService implements IService {
                         file.createNewFile();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    plugin.getLogger().log(Level.SEVERE, "Failed to create config file: " + name, e);
                 }
             }
+
             this.configuration = YamlConfiguration.loadConfiguration(file);
+            loadDefaults(name);
+        }
+
+        private void loadDefaults(String name) {
+            try {
+                var defaultStream = plugin.getResource(name + ".yml");
+                if (defaultStream != null) {
+                    YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
+                            new InputStreamReader(defaultStream, StandardCharsets.UTF_8));
+                    configuration.setDefaults(defaults);
+                    configuration.options().copyDefaults(true);
+                }
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.WARNING, "Failed to load defaults for config: " + name, e);
+            }
         }
 
         public FileConfiguration get() {
@@ -72,12 +130,13 @@ public class ConfigService implements IService {
             try {
                 configuration.save(file);
             } catch (IOException e) {
-                e.printStackTrace();
+                plugin.getLogger().log(Level.SEVERE, "Failed to save config file: " + file.getName(), e);
             }
         }
 
         public void reload() {
             this.configuration = YamlConfiguration.loadConfiguration(file);
+            loadDefaults(file.getName().replace(".yml", ""));
         }
     }
 }

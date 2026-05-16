@@ -1,0 +1,188 @@
+# ============================================================
+# NitroCore Messages Configuration
+# ============================================================
+# Alle Nachrichten des Plugins können hier konfiguriert werden
+# Färbcodes: &c = rot, &a = grün, &e = gelb, &l = bold, &n = underline
+
+# Allgemeine Nachrichten
+# ============================================================
+general:
+  prefix: "&8[&eNitroCore&8]&r"
+  error: "&cFehler: "
+  success: "&aErfolgreich!"
+  warning: "&eWarnung: "
+  info: "&bInfo: "
+
+# Spieler-bezogene Nachrichten
+# ============================================================
+player:
+  # Willkommen für neue Spieler
+  first-join: "&aWillkommen {player}! Du bist neu auf diesem Server."
+
+  # Willkommen für zurückkehrende Spieler
+  rejoin: "&aWillkommen zurück {player}! Schön dich wiederzusehen."
+
+  # Spieler verlässt Server
+  quit: "&c{player} hat den Server verlassen."
+
+  # Spieler tritt Server bei
+  join: "&a{player} hat den Server betreten."
+
+  # Player nicht gefunden
+  not-found: "&cSpieler nicht gefunden!"
+
+  # Player offline
+  offline: "&c{player} ist offline!"
+
+# Command-Nachrichten
+# ============================================================
+commands:
+  # Keine Permission
+  no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+
+  # Usage Nachricht
+  usage: "&eNutzung: {usage}"
+
+  # Zu wenige Argumente
+  wrong-args: "&cFalsche Anzahl von Argumenten!"
+
+  # Command erfolgreich
+  success: "&aBefehl erfolgreich ausgeführt!"
+
+  # Unknown command
+  unknown: "&cBefehl nicht gefunden! Nutze /help für Hilfe."
+
+# Permission-Nachrichten (LuckPerms)
+# ============================================================
+permissions:
+  # Gruppe verwaltet
+  group-added: "&a{player} wurde zur Gruppe {group} hinzugefügt!"
+  group-removed: "&a{player} wurde aus der Gruppe {group} entfernt!"
+
+  # Permission geändert
+  permission-granted: "&a{player} hat die Permission {permission}"
+  permission-revoked: "&c{player} hat die Permission {permission} nicht mehr"
+
+  # Prefix/Suffix gesetzt
+  prefix-set: "&aPrefix für {player} auf '{prefix}' gesetzt"
+  suffix-set: "&aSuffix für {player} auf '{suffix}' gesetzt"
+
+# Datenbank-Nachrichten
+# ============================================================
+database:
+  # Verbindung erfolgreich
+  connected: "&aVerbindung zur Datenbank hergestellt!"
+
+  # Verbindung fehlgeschlagen
+  connection-failed: "&cVerbindung zur Datenbank fehlgeschlagen!"
+
+  # Circuit Breaker offen
+  circuit-open: "&cDatabase Circuit Breaker ist OFFEN - Keine Operationen möglich!"
+
+  # Circuit Breaker geschlossen
+  circuit-closed: "&aDatabase Circuit Breaker wurde zurückgesetzt!"
+
+# Cache-Nachrichten
+# ============================================================
+cache:
+  # Cache geleert
+  cleared: "&aCache geleert!"
+
+  # Cache-Eintrag hinzugefügt
+  entry-added: "&aCache-Eintrag hinzugefügt"
+
+  # Cache-Eintrag entfernt
+  entry-removed: "&aCache-Eintrag entfernt"
+
+# Admin-Nachrichten
+# ============================================================
+admin:
+  # Reload erfolgreich
+  config-reloaded: "&aKonfiguration wurde neu geladen!"
+
+  # Statistiken
+  stats-header: "&e========== Server Statistiken =========="
+
+  # Player-Daten zurückgesetzt
+  data-reset: "&aSpieldaten für {player} wurden zurückgesetzt!"
+
+  # Wartungsmodus
+  maintenance: "&cServer befindet sich im Wartungsmodus!"
+
+# Spiel-Nachrichten
+# ============================================================
+gameplay:
+  # Arena-Nachrichten
+  arena-start: "&aArena startet in Kürze!"
+  arena-end: "&aArena zu Ende!"
+
+  # PvP Nachrichten
+  pvp-enabled: "&ePvP ist aktiviert!"
+  pvp-disabled: "&ePvP ist deaktiviert!"
+
+  # Countdown
+  countdown: "&e{seconds} Sekunden verbleibend..."
+
+# Item-Namen und Beschreibungen
+# ============================================================
+items:
+  # Item-Namen
+  sword-legendary: "&c&lLegendäres Schwert"
+  bow-mythic: "&5&lMythischer Bogen"
+
+  # Lore (Beschreibung)
+  lore-damage: "  &cSchaden: +{damage}"
+  lore-rarity: "  &6Seltenheit: {rarity}"
+  lore-enchanted: "  &bVerzaubert"
+
+# Zeitformat
+# ============================================================
+time:
+  # Lange Zeitformate
+  long-format: "dd.MM.yyyy HH:mm:ss"
+  short-format: "HH:mm"
+
+  # Relative Zeit
+  just-now: "gerade eben"
+  minutes-ago: "vor {minutes} Minuten"
+  hours-ago: "vor {hours} Stunden"
+  days-ago: "vor {days} Tagen"
+
+# ============================================================
+# Placeholder:
+# {player} = Spieler-Name
+# {group} = Gruppen-Name
+# {permission} = Permission Node
+# {prefix} = Prefix
+# {suffix} = Suffix
+# {damage} = Schaden-Wert
+# {rarity} = Seltenheit
+# {seconds} = Sekunden
+# {minutes} = Minuten
+# {hours} = Stunden
+# {days} = Tage
+# ============================================================
+
+# Farbcodes:
+# &0 = Schwarz
+# &1 = Dunkelblau
+# &2 = Dunkelgrün
+# &3 = Dunkelcyan
+# &4 = Dunkelrot
+# &5 = Violett
+# &6 = Orange
+# &7 = Hellgrau
+# &8 = Dunkelgrau
+# &9 = Hellblau
+# &a = Hellgrün
+# &b = Cyan
+# &c = Rot
+# &d = Magenta
+# &e = Gelb
+# &f = Weiß
+# &k = Obfuscated (Kryptisch)
+# &l = Bold (Fett)
+# &m = Strikethrough (Durchgestrichen)
+# &n = Underline (Unterstrichen)
+# &o = Italic (Kursiv)
+# &r = Reset (Zurücksetzen)

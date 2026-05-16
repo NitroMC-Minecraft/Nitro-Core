@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import de.grimlock.nitromc.cache.NitroCache;
 import de.grimlock.nitromc.config.ConfigService;
+import de.grimlock.nitromc.database.DatabaseManager;
 import de.grimlock.nitromc.database.DatabasePerformanceMonitor;
 import de.grimlock.nitromc.database.DatabaseService;
 import de.grimlock.nitromc.event.NitroEventBus;
@@ -43,6 +44,7 @@ public class Main extends JavaPlugin {
         startService(NitroCache.class);
         startService(DatabasePerformanceMonitor.class);
         startService(DatabaseService.class);
+        startService(DatabaseManager.class);
         startService(DiagnosticsService.class);
         startService(CooldownManager.class);
         startService(EffectService.class);

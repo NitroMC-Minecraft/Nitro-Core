@@ -1,0 +1,132 @@
+# ============================================================
+# NitroCore Main Configuration
+# ============================================================
+
+# Plugin Einstellungen
+# ============================================================
+plugin:
+  # Debug-Modus (true = detaillierte Logs)
+  debug: false
+
+  # Automatische Config-Reload bei Änderungen
+  auto-reload: true
+
+# Spieler-Verwandte Einstellungen
+# ============================================================
+player:
+  # Automatische Spieler-Daten speichern (Sekunden)
+  save-interval: 300
+
+  # Spieler-Daten beim Quit komplett löschen (false = beibehalten)
+  clear-on-quit: false
+
+  # Initial-Spawnpunkt
+  spawn:
+    world: "world"
+    x: 0.5
+    y: 100
+    z: 0.5
+    yaw: 0
+    pitch: 0
+
+# Cache Einstellungen
+# ============================================================
+cache:
+  # Standard TTL für Einträge (in Sekunden)
+  # Individuelle TTLs können programmatisch gesetzt werden
+  default-ttl: 1800  # 30 Minuten
+
+  # Maximum Anzahl gecachter Einträge
+  max-entries: 50000
+
+  # Cache-Statistiken aufzeichnen (Performance Impact!)
+  record-stats: false
+
+# Datenbank Performance Einstellungen
+# ============================================================
+database:
+  # Maximal parallel laufende Datenbank-Operationen
+  pool-size: 10
+
+  # Fehlerschwelle bis Circuit Breaker öffnet
+  failure-threshold: 5
+
+  # Recovery Timeout nach Circuit Break (Millisekunden)
+  recovery-timeout: 30000
+
+# Permissions & LuckPerms
+# ============================================================
+permissions:
+  # LuckPerms automatisch nutzen wenn verfügbar
+  use-luckperms: true
+
+  # Fallback Permission Node wenn LP nicht verfügbar
+  fallback-mode: "bukkit"  # "bukkit" oder "op"
+
+# Nachrichten & Text
+# ============================================================
+messages:
+  # Prefix für alle Plugin-Nachrichten
+  prefix: "&8[&eNitroCore&8] &r"
+
+  # Willkommensnachricht
+  welcome: "&aWillkommen auf dem Server!"
+
+  # Fehler-Nachricht
+  error: "&cEin Fehler ist aufgetreten!"
+
+  # Erfolg-Nachricht
+  success: "&aErfolgreich!"
+
+  # Permission Denied
+  no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+
+  # Player not found
+  player-not-found: "&cSpieler nicht gefunden!"
+
+# Logging Einstellungen
+# ============================================================
+logging:
+  # Datenbank-Queries loggen
+  log-queries: false
+
+  # Performance-Warnungen (in ms)
+  slow-query-threshold: 1000
+
+  # Player-Events loggen
+  log-player-events: true
+
+  # Cache-Operationen loggen
+  log-cache: false
+
+# Experimental Features
+# ============================================================
+experimental:
+  # Neue Features aktivieren (können instabil sein)
+  enabled: false
+
+  # Compression für Datenbank-Transfers
+  db-compression: false
+
+# Scheduler Einstellungen (Fortgeschrittene Nutzer)
+# ============================================================
+scheduler:
+  # Tick-Rate für periodische Tasks (Ticks)
+  tick-interval: 20
+
+  # Automatische Async-Task Verarbeitung
+  use-async: true
+
+# Developer Einstellungen
+# ============================================================
+developer:
+  # Test-Befehle anschalten
+  test-commands: false
+
+  # Detaillierte Stack Traces
+  verbose-errors: false
+
+# ============================================================
+# Änderungen an dieser Datei erfordern einen Server-Restart
+# oder verwende /nitrocore reload (falls implementiert)
+# ============================================================

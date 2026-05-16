@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 
 public class Table {
 
-    private final DatabaseService databaseService;
-    private final String tableName;
+    protected final DatabaseService databaseService;
+    protected String tableName;
 
     public Table(DatabaseService databaseService, String tableName) {
         this.databaseService = databaseService;

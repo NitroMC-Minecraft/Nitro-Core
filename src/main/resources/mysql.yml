@@ -1,0 +1,81 @@
+# ============================================================
+# NitroCore Database Configuration
+# ============================================================
+# Diese Datei wird automatisch erstellt beim ersten Server-Start
+# Bitte alle Daten korrekt ausfüllen für die Datenbank-Verbindung
+
+# MySQL Server Verbindungseinstellungen
+# ============================================================
+
+# Hostname oder IP-Adresse des MySQL Servers
+host: "localhost"
+
+# Port des MySQL Servers (Standard: 3306)
+port: 3306
+
+# Name der Datenbank
+# Hinweis: Die Datenbank muss manuell erstellt werden, bevor der Server lädt!
+database: "nitrocore"
+
+# Benutzername für die Datenbank
+username: "root"
+
+# Passwort für den Datenbank-Benutzer
+# WARNUNG: Dieses Passwort sollte sicher sein und nicht "root" oder leer!
+password: ""
+
+# ============================================================
+# Datenbank Setup Anleitung
+# ============================================================
+#
+# 1. SSH / Remote Desktop zum MySQL Server
+#
+# 2. Datenbank und Benutzer erstellen:
+#
+#    mysql -u root -p
+#
+#    CREATE DATABASE nitrocore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+#    CREATE USER 'nitrocore'@'localhost' IDENTIFIED BY 'dein_sicheres_passwort';
+#    GRANT ALL PRIVILEGES ON nitrocore.* TO 'nitrocore'@'localhost';
+#    FLUSH PRIVILEGES;
+#    EXIT;
+#
+# 3. Diese Datei aktualisieren:
+#    - host: IP des MySQL Servers (z.B. "192.168.1.100" oder "localhost")
+#    - port: 3306 (Standard für MySQL)
+#    - database: "nitrocore" (oder gewählter Name)
+#    - username: "nitrocore" (oder gewählter Benutzer)
+#    - password: "dein_sicheres_passwort" (das oben gesetzte Passwort)
+#
+# 4. Server neu starten
+#
+# ============================================================
+# Fehlerbehandlung
+# ============================================================
+#
+# "Connection refused":
+#   -> MySQL Server läuft nicht oder falscher Host/Port
+#   -> Firewall blockiert Port 3306?
+#
+# "Access denied for user":
+#   -> Username/Password falsch
+#   -> Benutzer hat nicht ausreichend Rechte
+#
+# "Unknown database 'nitrocore'":
+#   -> Datenbank existiert nicht
+#   -> CREATE DATABASE Befehl ausführen
+#
+# ============================================================
+# Performance Einstellungen (Auto)
+# ============================================================
+#
+# Die folgenden Einstellungen werden vom Plugin automatisch gesetzt:
+#
+# - HikariCP Connection Pool Size: 10
+# - MySQL Driver: MariaDB JDBC Driver 3.4.1
+# - Timeout Circuit Breaker: 30 Sekunden
+# - Failure Threshold: 5 Fehler
+#
+# Diese sollten nicht manuell geändert werden!
+#
+# ============================================================
