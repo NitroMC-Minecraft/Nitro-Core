@@ -21,7 +21,7 @@ repositories {
 dependencies {
     compileOnly "io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT"
     compileOnly 'net.luckperms:api:5.4'
-    
+
     testImplementation "io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT"
 
     implementation "com.google.inject:guice:7.0.0"
@@ -56,10 +56,23 @@ java {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
 publishing {
     publications {
         gpr(MavenPublication) {
             from components.java
+
+            // Behebt den Fehler 422: GitHub erzwingt die Verknüpfung zum Repository in den POM-Metadaten
+            pom {
+                name = 'Nitro-Core'
+                description = 'NitroMC Core System'
+                url = 'https://github.com/nitromc-minecraft/nitro-core'
+                scm {
+                    connection = 'scm:git:github.com/nitromc-minecraft/nitro-core.git'
+                    developerConnection = 'scm:git:ssh://github.com/nitromc-minecraft/nitro-core.git'
+                    url = 'https://github.com/nitromc-minecraft/nitro-core'
+                }
+            }
         }
     }
     repositories {
