@@ -44,7 +44,9 @@ public class Main extends JavaPlugin {
         startService(NitroCache.class);
         startService(DatabasePerformanceMonitor.class);
         startService(DatabaseService.class);
+        DatabaseManager databaseManager = injector.getInstance(DatabaseManager.class);
         startService(DatabaseManager.class);
+        databaseManager.scanAndRegister("de.grimlock.nitromc");
         startService(DiagnosticsService.class);
         startService(CooldownManager.class);
         startService(EffectService.class);

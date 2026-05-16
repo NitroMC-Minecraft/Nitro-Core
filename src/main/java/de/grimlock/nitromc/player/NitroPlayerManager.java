@@ -1,13 +1,12 @@
 package de.grimlock.nitromc.player;
 
+import de.grimlock.nitromc.database.DatabaseManager;
 import de.grimlock.nitromc.database.DatabasePriority;
-import de.grimlock.nitromc.database.DatabaseService;
 import de.grimlock.nitromc.event.AsyncDataIntegrityCheckEvent;
 import de.grimlock.nitromc.event.NitroEventBus;
 import de.grimlock.nitromc.event.PreDataLoadEvent;
 import de.grimlock.nitromc.integration.luckperms.LuckPermsService;
 import de.grimlock.nitromc.service.IService;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import javax.inject.Inject;
@@ -19,42 +18,29 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class NitroPlayerManager implements IService {
 
-    private final DatabaseService databaseService;
+    private final DatabaseManager databaseManager;
     private final LuckPermsService luckPermsService;
     private final NitroEventBus eventBus;
     private final ConcurrentHashMap<UUID, NitroPlayer> players = new ConcurrentHashMap<>();
+    private NitroPlayerTable playerTable;
 
     @Inject
-    public NitroPlayerManager(DatabaseService databaseService, LuckPermsService luckPermsService, NitroEventBus eventBus) {
-        this.databaseService = databaseService;
+    public NitroPlayerManager(DatabaseManager databaseManager, LuckPermsService luckPermsService, NitroEventBus eventBus) {
+        this.databaseManager = databaseManager;
         this.luckPermsService = luckPermsService;
         this.eventBus = eventBus;
     }
 
     @Override
     public void onEnable() {
-        databaseService.executeUpdateAsync(DatabasePriority.HIGH,
-            "CREATE TABLE IF NOT EXISTS nitro_players (" +
-            "uuid VARCHAR(36) PRIMARY KEY, " +
-            "name VARCHAR(16) NOT NULL, " +
-            "first_join BIGINT NOT NULL, " +
-            "last_join BIGINT NOT NULL" +
-            ")"
-        ).thenAccept(v -> Bukkit.getLogger().info("NitroPlayer table initialized"))
-            .exceptionally(e -> {
-                Bukkit.getLogger().warning("Failed to initialize NitroPlayer table: " + e.getMessage());
-                return null;
-            });
+        playerTable = databaseManager.get(NitroPlayerTable.class);
     }
 
     @Override
     public void onDisable() {
         for (NitroPlayer player : players.values()) {
-            long now = System.currentTimeMillis();
-            databaseService.executeUpdateAsync(DatabasePriority.MEDIUM,
-                "UPDATE nitro_players SET last_join = ? WHERE uuid = ?",
-                now, player.getUniqueId().toString()
-            ).join();
+            java.util.Map<String, Object> updates = java.util.Map.of("last_join", System.currentTimeMillis());
+            playerTable.updateMultiple("uuid", player.getUniqueId().toString(), updates).join();
         }
         players.clear();
     }
@@ -63,11 +49,10 @@ public class NitroPlayerManager implements IService {
         UUID uuid = player.getUniqueId();
 
         PreDataLoadEvent event = new PreDataLoadEvent(uuid);
-        Bukkit.getPluginManager().callEvent(event);
+        org.bukkit.Bukkit.getPluginManager().callEvent(event);
 
-        databaseService.table("nitro_players")
-            .select()
-            .where("uuid = ?", uuid.toString())
+        playerTable.query()
+            .where("`uuid` = ?", uuid.toString())
             .mapTo(rs -> {
                 String name = rs.getString("name");
                 long firstJoin = rs.getLong("first_join");
@@ -83,11 +68,11 @@ public class NitroPlayerManager implements IService {
                 } else {
                     long now = System.currentTimeMillis();
                     NitroPlayer newPlayer = new NitroPlayer(player, luckPermsService, player.getName(), now, now);
-                    insertPlayerData(uuid, newPlayer);
+                    insertPlayerData(newPlayer);
                 }
             })
             .exceptionally(e -> {
-                Bukkit.getLogger().warning("Failed to load player data for " + player.getName() + ": " + e.getMessage());
+                org.bukkit.Bukkit.getLogger().warning("Failed to load player data for " + player.getName() + ": " + e.getMessage());
                 return null;
             });
     }
@@ -95,11 +80,8 @@ public class NitroPlayerManager implements IService {
     public void unloadPlayer(UUID uuid) {
         NitroPlayer player = players.remove(uuid);
         if (player != null) {
-            long now = System.currentTimeMillis();
-            databaseService.executeUpdateAsync(DatabasePriority.MEDIUM,
-                "UPDATE nitro_players SET last_join = ? WHERE uuid = ?",
-                now, uuid.toString()
-            );
+            java.util.Map<String, Object> updates = java.util.Map.of("last_join", System.currentTimeMillis());
+            playerTable.updateMultiple("uuid", uuid.toString(), updates);
         }
     }
 
@@ -111,19 +93,17 @@ public class NitroPlayerManager implements IService {
         return players.values();
     }
 
-    private void insertPlayerData(UUID uuid, NitroPlayer player) {
-        databaseService.executeUpdateAsync(DatabasePriority.MEDIUM,
-            "INSERT INTO nitro_players (uuid, name, first_join, last_join) VALUES (?, ?, ?, ?)",
-            uuid.toString(), player.getName(), player.getFirstJoin(), player.getLastJoin()
-        ).thenAccept(v -> {
-            players.put(uuid, player);
-            AsyncDataIntegrityCheckEvent event = new AsyncDataIntegrityCheckEvent(uuid.toString(), player);
-            event.setValid(true);
-            eventBus.post(event);
-        })
-        .exceptionally(e -> {
-            Bukkit.getLogger().warning("Failed to insert player data for " + player.getName() + ": " + e.getMessage());
-            return null;
-        });
+    private void insertPlayerData(NitroPlayer player) {
+        playerTable.save(player)
+            .thenAccept(v -> {
+                players.put(player.getUniqueId(), player);
+                AsyncDataIntegrityCheckEvent event = new AsyncDataIntegrityCheckEvent(player.getUniqueId().toString(), player);
+                event.setValid(true);
+                eventBus.post(event);
+            })
+            .exceptionally(e -> {
+                org.bukkit.Bukkit.getLogger().warning("Failed to insert player data for " + player.getName() + ": " + e.getMessage());
+                return null;
+            });
     }
 }

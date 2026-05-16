@@ -1,10 +1,50 @@
-# NitroCore
+    ███╗   ██╗██╗████████╗██████╗  ██████╗ ██████╗ ██████╗ ███████╗
+    ████╗  ██║██║╚══██╔══╝██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔════╝
+    ██╔██╗ ██║██║   ██║   ██████╔╝██║   ██║██████╔╝██║  ██║█████╗
+    ██║╚██╗██║██║   ██║   ██╔══██╗██║   ██║██╔══██╗██║  ██║██╔══╝
+    ██║ ╚████║██║   ██║   ██║  ██║╚██████╔╝██║  ██║██████╔╝███████╗
+    ╚═╝  ╚═══╝╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚══════╝
 
-Ein professionelles, asynchrones Minecraft Paper Plugin Framework mit **vollständigem ORM-ähnlichen Database Management System**, **typsichers Dependency Injection**, und **Zero External Dependencies** (außer Guice, HikariCP, Caffeine).
+<div align="center">
 
-```
-Paper 1.21.1 | Java 21+ | MySQL 8.0+ / MariaDB 10.5+ | Production Ready
-```
+**Ein professionelles, asynchrones Minecraft Paper Plugin Framework**
+
+![Version](https://img.shields.io/badge/Version-1.0.0-6C5CE7?style=flat-square)
+![Java](https://img.shields.io/badge/Java-21+-F39C12?style=flat-square&logo=openjdk&logoColor=white)
+![Paper](https://img.shields.io/badge/Paper-1.21.1-00BDFF?style=flat-square)
+![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![MariaDB](https://img.shields.io/badge/MariaDB-10.5+-003545?style=flat-square&logo=mariadb&logoColor=white)
+![Build](https://img.shields.io/badge/Build-Passing-00B894?style=flat-square)
+
+</div>
+
+---
+
+## 📑 Inhaltsverzeichnis
+
+- [Installation](#installation)
+- [Quick Start - Neue Tabelle in 2 Minuten](#quick-start---neue-tabelle-in-2-minuten)
+- [Neue Tabelle im Real-World Beispiel](#neue-tabelle-im-real-world-beispiel)
+- [So einfach ist es!](#so-einfach-ist-es)
+- [Features](#features)
+  - [Database ORM System](#-database-orm-system)
+  - [Dependency Injection](#-dependency-injection)
+  - [Async Database](#-async-database)
+  - [Cache System](#-cache-system)
+  - [LuckPerms Integration](#-luckperms-integration)
+  - [Config Service](#-config-service)
+  - [ItemBuilder](#-itembuilder)
+  - [Utilities](#-utilities)
+  - [Player Management](#-player-management)
+  - [Core Architecture](#-core-architecture)
+- [Database Schema & Management](#database-schema--management)
+  - [Automatically Created Tables](#automatically-created-tables)
+  - [Häufige Queries](#häufige-queries)
+  - [Query Performance Tipps](#query-performance-tipps)
+  - [Backups](#backups)
+  - [Design Patterns](#design-patterns)
+  - [Troubleshooting](#troubleshooting)
+- [License](#license)
 
 ---
 
@@ -39,13 +79,13 @@ username: "nitrocore"
 password: "dein_passwort"
 ```
 
-**MySQL Setup** (einmaliger Setup):
-```sql
-CREATE DATABASE nitrocore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'nitrocore'@'localhost' IDENTIFIED BY 'dein_passwort';
-GRANT ALL PRIVILEGES ON nitrocore.* TO 'nitrocore'@'localhost';
-FLUSH PRIVILEGES;
-```
+> **💡 MySQL Setup** (einmaliger Setup):
+> ```sql
+> CREATE DATABASE nitrocore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+> CREATE USER 'nitrocore'@'localhost' IDENTIFIED BY 'dein_passwort';
+> GRANT ALL PRIVILEGES ON nitrocore.* TO 'nitrocore'@'localhost';
+> FLUSH PRIVILEGES;
+> ```
 
 ### 4. Server starten
 
@@ -53,90 +93,61 @@ FLUSH PRIVILEGES;
 java -Xmx1024M -Xms1024M -jar paper-1.21.1-xxx.jar nogui
 ```
 
-Das Plugin erstellt automatisch alle notwendigen Tabellen beim Startup. ✅
+> **✅ Das Plugin erstellt automatisch alle notwendigen Tabellen beim Startup.**
 
 ---
 
-## Quick Start - So nutzt du das Plugin
+## Quick Start - Neue Tabelle in 2 Minuten
 
-### Schritt 1: Entity-Klasse erstellen
+### Schritt 1: Entity-Klasse (Plain POJO)
 
 ```java
-import de.grimlock.nitromc.database.Saveable;
-import java.util.Map;
 import java.util.UUID;
 
-public class PlayerStats implements Saveable {
+public class PlayerStats {
     private UUID uuid;
     private int kills;
     private int deaths;
-    
+
     public PlayerStats(UUID uuid, int kills, int deaths) {
         this.uuid = uuid;
         this.kills = kills;
         this.deaths = deaths;
     }
-    
-    // Getter...
+
     public UUID getUuid() { return uuid; }
     public int getKills() { return kills; }
     public int getDeaths() { return deaths; }
-    
-    @Override
-    public Map<String, Object> toRow() {
-        return Map.of(
-            "uuid", uuid.toString(),
-            "kills", kills,
-            "deaths", deaths
-        );
-    }
-    
-    @Override
-    public String getPrimaryKeyColumn() { return "uuid"; }
-    
-    @Override
-    public Object getPrimaryKeyValue() { return uuid.toString(); }
 }
 ```
 
-### Schritt 2: Tabellen-Klasse definieren
+### Schritt 2: Tabellen-Klasse mit @AutoTable (Das ist alles!)
 
 ```java
 import de.grimlock.nitromc.database.*;
 import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.UUID;
 
+@AutoTable  // ← Diese Annotation genügt!
 public class PlayerStatsTable extends ManagedTable<PlayerStats> {
-    
+
     @Inject
     public PlayerStatsTable(DatabaseService databaseService) {
         super(databaseService);
     }
-    
+
     @Override
     public TableSchema defineSchema() {
         return TableSchema.of("player_stats")
-            // UUID als Primary Key
-            .column(ColumnDef.of("uuid", ColumnType.VARCHAR, 36)
-                .primaryKey()
-                .notNull())
-            
-            // Kills - Default 0
-            .column(ColumnDef.of("kills", ColumnType.INT)
-                .defaultValue(0)
-                .notNull())
-            
-            // Deaths - Default 0
-            .column(ColumnDef.of("deaths", ColumnType.INT)
-                .defaultValue(0)
-                .notNull())
-            
-            // Foreign Key zu nitro_players
+            .column(ColumnDef.of("uuid", ColumnType.VARCHAR, 36).primaryKey().notNull())
+            .column(ColumnDef.of("kills", ColumnType.INT).defaultValue(0).notNull())
+            .column(ColumnDef.of("deaths", ColumnType.INT).defaultValue(0).notNull())
             .foreignKey("uuid", "nitro_players", "uuid");
     }
-    
+
     @Override
     public PlayerStats mapRow(ResultSet rs) throws SQLException {
         return new PlayerStats(
@@ -145,26 +156,21 @@ public class PlayerStatsTable extends ManagedTable<PlayerStats> {
             rs.getInt("deaths")
         );
     }
+
+    @Override
+    protected Map<String, Object> toRow(PlayerStats entity) {
+        return Map.of(
+            "uuid", entity.getUuid().toString(),
+            "kills", entity.getKills(),
+            "deaths", entity.getDeaths()
+        );
+    }
 }
 ```
 
-### Schritt 3: Tabelle registrieren
+> **✅ Fertig!** Die Tabelle wird automatisch beim Start erstellt und registriert.
 
-In deinem Plugin (beim Startup):
-
-```java
-@Inject
-private DatabaseManager databaseManager;
-
-@Override
-public void onEnable() {
-    // Tabelle registrieren
-    databaseManager.register(PlayerStatsTable.class,
-        getServer().getServiceManager().load(PlayerStatsTable.class));
-}
-```
-
-### Schritt 4: Benutzen - Async CRUD
+### Schritt 3: Nutzen in deinem Code
 
 ```java
 @Inject
@@ -173,66 +179,55 @@ private DatabaseManager databaseManager;
 public void handlePlayer(Player player) {
     PlayerStatsTable table = databaseManager.get(PlayerStatsTable.class);
     UUID uuid = player.getUniqueId();
-    
+
     // SELECT
     table.findById(uuid)
         .thenAccept(opt -> opt.ifPresent(stats -> {
             player.sendMessage("Kills: " + stats.getKills());
         }));
-    
+
     // INSERT/UPSERT
     PlayerStats newStats = new PlayerStats(uuid, 10, 5);
     table.save(newStats)
         .thenRun(() -> player.sendMessage("Stats gespeichert!"));
-    
+
     // UPDATE
-    table.updateMultiple(
-        "uuid", uuid.toString(),
+    table.updateMultiple("uuid", uuid.toString(),
         Map.of("kills", 15, "deaths", 5)
     ).join();
-    
+
     // DELETE
     table.deleteById(uuid).join();
-    
-    // Advanced Queries
+
+    // Advanced Query
     table.query()
         .where("kills > ?", 100)
         .orderByDesc("kills")
         .limit(10)
-        .mapToList(this::mapRow)
+        .mapToList(entity -> entity)
         .thenAccept(topPlayers -> {
-            // Top 10 Spieler verarbeiten
+            player.sendMessage("Top Killers: " + topPlayers.size());
         });
 }
 ```
 
 ---
 
-## Neue Tabellen erstellen - Vollständiges Tutorial
+## Neue Tabelle im Real-World Beispiel
 
-Das ist die **Kernfunktionalität** des ORM Systems. Mit wenig Code bekommst du komplette DB-Verwaltung.
-
-### 📝 Komplett Beispiel: NPC-Datenbank
-
-Wir erstellen eine Tabelle für custom NPCs mit Position, Name und Settings.
-
-#### Schritt 1: Entity-Klasse `CustomNPC.java`
+### Entity-Klasse (Plain POJO)
 
 ```java
-package de.grimlock.nitromc.entities;
-
-import de.grimlock.nitromc.database.Saveable;
-import java.util.Map;
 import java.util.UUID;
 
-public class CustomNPC implements Saveable {
+public class CustomNPC {
     private int id;
     private UUID creatorUUID;
     private String npcName;
     private double x, y, z;
     private String world;
     private String skinBase64;
-    
+
     public CustomNPC(int id, UUID creator, String name, double x, double y, double z, String world, String skin) {
         this.id = id;
         this.creatorUUID = creator;
@@ -243,8 +238,7 @@ public class CustomNPC implements Saveable {
         this.world = world;
         this.skinBase64 = skin;
     }
-    
-    // Getter
+
     public int getId() { return id; }
     public UUID getCreatorUUID() { return creatorUUID; }
     public String getNpcName() { return npcName; }
@@ -253,94 +247,45 @@ public class CustomNPC implements Saveable {
     public double getZ() { return z; }
     public String getWorld() { return world; }
     public String getSkinBase64() { return skinBase64; }
-    
-    @Override
-    public Map<String, Object> toRow() {
-        return Map.of(
-            "id", id,
-            "creator_uuid", creatorUUID.toString(),
-            "npc_name", npcName,
-            "x", x,
-            "y", y,
-            "z", z,
-            "world", world,
-            "skin_base64", skinBase64
-        );
-    }
-    
-    @Override
-    public String getPrimaryKeyColumn() {
-        return "id";  // ID ist der Primary Key
-    }
-    
-    @Override
-    public Object getPrimaryKeyValue() {
-        return id;
-    }
 }
 ```
 
-#### Schritt 2: Table-Klasse `CustomNPCTable.java`
+### Table-Klasse mit @AutoTable
 
 ```java
-package de.grimlock.nitromc.database.tables;
-
 import de.grimlock.nitromc.database.*;
-import de.grimlock.nitromc.entities.CustomNPC;
 import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.UUID;
 
+@AutoTable  // Auto-registered on startup!
 public class CustomNPCTable extends ManagedTable<CustomNPC> {
-    
+
     @Inject
     public CustomNPCTable(DatabaseService databaseService) {
         super(databaseService);
     }
-    
+
     @Override
     public TableSchema defineSchema() {
         return TableSchema.of("custom_npcs")
-            
-            // ID - Auto Increment Primary Key
             .column(ColumnDef.of("id", ColumnType.INT)
                 .primaryKey()
                 .autoIncrement()
                 .notNull())
-            
-            // Creator UUID - Foreign Key zu nitro_players
-            .column(ColumnDef.of("creator_uuid", ColumnType.VARCHAR, 36)
-                .notNull())
-            
-            // NPC Name
-            .column(ColumnDef.of("npc_name", ColumnType.VARCHAR, 255)
-                .notNull())
-            
-            // Position
-            .column(ColumnDef.of("x", ColumnType.DOUBLE)
-                .notNull())
-            .column(ColumnDef.of("y", ColumnType.DOUBLE)
-                .notNull())
-            .column(ColumnDef.of("z", ColumnType.DOUBLE)
-                .notNull())
-            
-            // Welt
-            .column(ColumnDef.of("world", ColumnType.VARCHAR, 100)
-                .notNull())
-            
-            // Skin Texture (Base64)
-            .column(ColumnDef.of("skin_base64", ColumnType.BLOB)
-                .nullable())
-            
-            // Timestamp
-            .column(ColumnDef.of("created_at", ColumnType.TIMESTAMP)
-                .notNull())
-            
-            // Foreign Key
+            .column(ColumnDef.of("creator_uuid", ColumnType.VARCHAR, 36).notNull())
+            .column(ColumnDef.of("npc_name", ColumnType.VARCHAR, 255).notNull())
+            .column(ColumnDef.of("x", ColumnType.DOUBLE).notNull())
+            .column(ColumnDef.of("y", ColumnType.DOUBLE).notNull())
+            .column(ColumnDef.of("z", ColumnType.DOUBLE).notNull())
+            .column(ColumnDef.of("world", ColumnType.VARCHAR, 100).notNull())
+            .column(ColumnDef.of("skin_base64", ColumnType.BLOB).nullable())
+            .column(ColumnDef.of("created_at", ColumnType.TIMESTAMP).notNull())
             .foreignKey("creator_uuid", "nitro_players", "uuid");
     }
-    
+
     @Override
     public CustomNPC mapRow(ResultSet rs) throws SQLException {
         return new CustomNPC(
@@ -354,48 +299,38 @@ public class CustomNPCTable extends ManagedTable<CustomNPC> {
             rs.getString("skin_base64")
         );
     }
-}
-```
 
-#### Schritt 3: In deinem Plugin registrieren
-
-```java
-package de.grimlock.nitromc.my_plugin;
-
-import de.grimlock.nitromc.database.DatabaseManager;
-import de.grimlock.nitromc.database.tables.CustomNPCTable;
-import de.grimlock.nitromc.Main;
-import org.bukkit.plugin.java.JavaPlugin;
-
-public class MyNitroPlugin extends JavaPlugin {
-    
     @Override
-    public void onEnable() {
-        // Zugriff auf NitroCore Services über DependencyInjection
-        Main nitroCore = Main.getInstance();
-        DatabaseManager dbManager = nitroCore.getInjector().getInstance(DatabaseManager.class);
-        
-        // CustomNPC Tabelle registrieren
-        CustomNPCTable npcTable = nitroCore.getInjector().getInstance(CustomNPCTable.class);
-        dbManager.register(CustomNPCTable.class, npcTable);
-        
-        getLogger().info("Custom NPC Tabelle registriert!");
+    protected Map<String, Object> toRow(CustomNPC entity) {
+        return Map.of(
+            "id", entity.getId(),
+            "creator_uuid", entity.getCreatorUUID().toString(),
+            "npc_name", entity.getNpcName(),
+            "x", entity.getX(),
+            "y", entity.getY(),
+            "z", entity.getZ(),
+            "world", entity.getWorld(),
+            "skin_base64", entity.getSkinBase64(),
+            "created_at", System.currentTimeMillis()
+        );
     }
 }
 ```
 
-#### Schritt 4: Nutzen in deinem Code
+> **🚀 Das ist alles!** Kein registrieren, kein Main.java ändern. Fertig!
+
+### Nutzen in deinem Code
 
 ```java
 public class NPCManager {
-    
+
     @Inject
     private DatabaseManager databaseManager;
-    
+
     // CREATE - Neuen NPC erstellen
     public void createNPC(UUID creator, String name, Location loc, String skinBase64) {
         CustomNPCTable table = databaseManager.get(CustomNPCTable.class);
-        
+
         CustomNPC npc = new CustomNPC(
             0,  // ID wird vom DB auto_increment gesetzt
             creator,
@@ -406,25 +341,25 @@ public class NPCManager {
             loc.getWorld().getName(),
             skinBase64
         );
-        
+
         table.save(npc)
             .thenRun(() -> System.out.println("NPC erstellt!"));
     }
-    
+
     // READ - NPC laden
     public void loadNPC(int id) {
         CustomNPCTable table = databaseManager.get(CustomNPCTable.class);
-        
+
         table.findById(id)
             .thenAccept(opt -> opt.ifPresent(npc -> {
                 System.out.println("NPC: " + npc.getNpcName() + " at " + npc.getX());
             }));
     }
-    
+
     // READ - Alle NPCs eines Creators
     public void loadCreatorNPCs(UUID creator) {
         CustomNPCTable table = databaseManager.get(CustomNPCTable.class);
-        
+
         table.query()
             .where("creator_uuid = ?", creator.toString())
             .orderByDesc("id")
@@ -433,11 +368,11 @@ public class NPCManager {
                 System.out.println("Creator hat " + npcs.size() + " NPCs");
             });
     }
-    
+
     // UPDATE - NPC Position ändern
     public void updateNPCLocation(int id, Location newLoc) {
         CustomNPCTable table = databaseManager.get(CustomNPCTable.class);
-        
+
         table.updateMultiple(
             "id", id,
             Map.of(
@@ -448,19 +383,19 @@ public class NPCManager {
             )
         ).thenRun(() -> System.out.println("Location aktualisiert!"));
     }
-    
+
     // DELETE - NPC löschen
     public void deleteNPC(int id) {
         CustomNPCTable table = databaseManager.get(CustomNPCTable.class);
-        
+
         table.deleteById(id)
             .thenRun(() -> System.out.println("NPC gelöscht!"));
     }
-    
+
     // Advanced Query - NPCs in einer Welt
     public void loadNPCsInWorld(String world) {
         CustomNPCTable table = databaseManager.get(CustomNPCTable.class);
-        
+
         table.query()
             .where("world = ?", world)
             .orderBy("npc_name")
@@ -475,66 +410,118 @@ public class NPCManager {
 
 ---
 
-### 🔑 Wichtige Punkte beim Erstellen von Tabellen
+## So einfach ist es!
 
-**1. Entity-Klasse**
-- Muss `Saveable` implementieren
-- `toRow()` konvertiert Objekt zu Map<String, Object>
-- `getPrimaryKeyColumn()` + `getPrimaryKeyValue()` für das ID-Feld
+### Nur 3 Schritte für eine neue Tabelle:
 
-**2. Table-Klasse**
-- Extends `ManagedTable<T>` (T = Entity-Klasse)
-- `defineSchema()` definiert Spalten, Constraints, Foreign Keys
-- `mapRow(ResultSet)` konvertiert DB-Zeile zu Entity-Objekt
-
-**3. Schema Definition**
+**1. Entity schreiben** — einfaches POJO, keine Interfaces
 ```java
-TableSchema.of("table_name")
-    .column(ColumnDef.of("col_name", ColumnType.VARCHAR, 255)
-        .primaryKey()      // Optional: PK
-        .autoIncrement()   // Optional: Auto-Increment
-        .notNull()         // Optional: NOT NULL
-        .defaultValue(x))  // Optional: Default Wert
-    .foreignKey("fk_col", "ref_table", "ref_col")  // Optional: FK
+public class User {
+    private UUID uuid;
+    private String name;
+    // getter, constructor
+}
 ```
 
-**4. ColumnTypes verfügbar:**
-```
-VARCHAR (braucht length)    TEXT
-INT                         BIGINT
-DOUBLE                      BOOLEAN
-BLOB                        TIMESTAMP
-DATETIME
-```
-
-**5. Registrierung**
+**2. Table-Klasse schreiben** — mit `@AutoTable`
 ```java
-CustomNPCTable table = injector.getInstance(CustomNPCTable.class);
-databaseManager.register(CustomNPCTable.class, table);
+@AutoTable
+public class UserTable extends ManagedTable<User> {
+    @Override public TableSchema defineSchema() { /* schema */ }
+    @Override public User mapRow(ResultSet rs) { /* mapping */ }
+    @Override protected Map<String, Object> toRow(User e) { /* to row */ }
+}
 ```
 
-**6. CRUD Operationen**
+**3. Nutzen!**
 ```java
-table.findById(id)           // Optional<T>
-table.findAll()              // List<T>
-table.findWhere("col", val)  // List<T>
-table.save(entity)           // INSERT oder UPDATE
-table.deleteById(id)         // DELETE
-table.count()                // Long
-table.query()...             // Advanced Queries
+UserTable table = databaseManager.get(UserTable.class);
+table.findById(uuid).thenAccept(user -> { ... });
 ```
+
+> **✅ Die Tabelle wird automatisch beim Server-Start erstellt und registriert.**
+
+### Available ColumnTypes
+
+| Type | SQL | Beschreibung |
+|------|-----|-------------|
+| `ColumnType.VARCHAR` | `VARCHAR(n)` | Variable Zeichenkette |
+| `ColumnType.TEXT` | `TEXT` | Lange Zeichenkette |
+| `ColumnType.INT` | `INT` | Ganzzahl (32-bit) |
+| `ColumnType.BIGINT` | `BIGINT` | Große Ganzzahl (64-bit) |
+| `ColumnType.DOUBLE` | `DOUBLE` | Fließkommazahl |
+| `ColumnType.BOOLEAN` | `BOOLEAN` | Wahr/Falsch |
+| `ColumnType.BLOB` | `BLOB` | Binärdaten (Base64) |
+| `ColumnType.TIMESTAMP` | `TIMESTAMP` | Zeitstempel |
+| `ColumnType.DATETIME` | `DATETIME` | Datum & Zeit |
+
+### CRUD Operations
+
+```java
+UserTable table = databaseManager.get(UserTable.class);
+
+// READ
+table.findById(uuid)                           // Optional<User>
+table.findAll()                                // List<User>
+table.findWhere("name", "Alice")               // List<User>
+table.query().where("kills > ?", 100).mapToList(...)  // Advanced
+
+// CREATE/UPDATE
+table.save(user)                               // UPSERT
+table.batchSave(List<User> users)              // Batch UPSERT
+
+// UPDATE only specific fields
+table.updateMultiple("uuid", uuid,
+    Map.of("name", "Bob", "kills", 50))
+
+// DELETE
+table.deleteById(uuid)
+table.deleteWhere("name", "Bob")
+
+// UTILITY
+table.count()                                  // Long
+table.exists("uuid", uuid)                     // Boolean
+```
+
+> **4. ColumnTypes verfügbar:**
+> ```
+> VARCHAR (braucht length)    TEXT
+> INT                         BIGINT
+> DOUBLE                      BOOLEAN
+> BLOB                        TIMESTAMP
+> DATETIME
+> ```
+
+> **5. Registrierung**
+> ```java
+> CustomNPCTable table = injector.getInstance(CustomNPCTable.class);
+> databaseManager.register(CustomNPCTable.class, table);
+> ```
+
+> **6. CRUD Operationen**
+> ```java
+> table.findById(id)           // Optional<T>
+> table.findAll()              // List<T>
+> table.findWhere("col", val)  // List<T>
+> table.save(entity)           // INSERT oder UPDATE
+> table.deleteById(id)         // DELETE
+> table.count()                // Long
+> table.query()...             // Advanced Queries
+> ```
 
 ---
 
 ## Features
 
-### 🗄️ **Database ORM System** - Vollständiges Management
+### 🗄️ Database ORM System
+
+Vollständiges Management für deine Datenbank-Tabellen.
 
 **Table Definition:**
 - `ManagedTable<T>` — Erbe davon, konfiguriere Schema, fertig
 - `TableSchema` — Fluent API für Spalten-Definition
-- `ColumnDef` — Spalten mit Constraints: primaryKey(), notNull(), defaultValue(), autoIncrement()
-- `ColumnType` — VARCHAR, TEXT, INT, BIGINT, DOUBLE, BOOLEAN, BLOB, TIMESTAMP, DATETIME
+- `ColumnDef` — Spalten mit Constraints: `primaryKey()`, `notNull()`, `defaultValue()`, `autoIncrement()`
+- `ColumnType` — `VARCHAR`, `TEXT`, `INT`, `BIGINT`, `DOUBLE`, `BOOLEAN`, `BLOB`, `TIMESTAMP`, `DATETIME`
 
 **CRUD Operations:**
 ```java
@@ -582,7 +569,9 @@ migrations
     .thenAccept(count -> logger.info("Applied " + count + " migrations"));
 ```
 
-### 🔌 **Dependency Injection** - Google Guice
+---
+
+### 🔌 Dependency Injection
 
 ```java
 @Inject
@@ -598,11 +587,13 @@ private LuckPermsService luckPerms;
 private NitroCache cache;
 ```
 
-Automatische Injection. Services registrieren sich selbst. Zero Manual Wiring.
+> **💡 Automatische Injection.** Services registrieren sich selbst. Zero Manual Wiring.
 
-### ⚡ **Async Database** - Nie Main Thread blockieren
+---
 
-- Priority Queue (LOW, MEDIUM, HIGH, MONITOR)
+### ⚡ Async Database
+
+- Priority Queue (`LOW`, `MEDIUM`, `HIGH`, `MONITOR`)
 - Circuit Breaker mit Auto-Recovery (5 Fehler → 30s Recovery)
 - Connection Pooling (HikariCP, max 10 connections)
 - Performance Monitoring (slow query detection)
@@ -613,7 +604,11 @@ table.findById(uuid)
     .exceptionally(err -> { /* error handling */ });
 ```
 
-### 💾 **Cache System** - Caffeine mit Custom TTL
+---
+
+### 💾 Cache System
+
+Caffeine-basiert mit Custom TTL.
 
 ```java
 @Inject
@@ -639,7 +634,11 @@ cache.unsubscribe("updates", subscriber);
 cache.invalidateAll(keys);
 ```
 
-### 🔐 **LuckPerms Integration** - Echte Permission Checks
+---
+
+### 🔐 LuckPerms Integration
+
+Echte Permission Checks über die LuckPerms API.
 
 ```java
 @Inject
@@ -648,28 +647,32 @@ private LuckPermsService luckPerms;
 if (luckPerms.isAvailable()) {
     // Permission Check (echte LP API, nicht Bukkit Passthrough)
     boolean hasAdmin = luckPerms.hasPermission(player, "nitrocore.admin");
-    
+
     // Gruppen
     List<String> groups = luckPerms.getAllGroups(player);
-    
+
     // Chat Formatting
     String prefix = luckPerms.getPrefix(player);    // "[ADMIN] "
     String suffix = luckPerms.getSuffix(player);    // " ◆"
-    
+
     // Meta Values
     Optional<String> customRank = luckPerms.getMetaValue(player, "rank");
-    
+
     // Gruppen-Management (async)
     luckPerms.addToGroup(uuid, "vip")
         .thenRun(() -> logger.info("User added to VIP"));
-    
+
     // Offline Spieler laden
     luckPerms.getUserAsync(uuid)
         .thenAccept(user -> user.ifPresent(u -> { /* ... */ }));
 }
 ```
 
-### ⚙️ **Config Service** - Thread-safe mit Defaults
+---
+
+### ⚙️ Config Service
+
+Thread-safe mit Defaults und Reload Listener.
 
 ```java
 @Inject
@@ -688,9 +691,13 @@ config.addReloadListener(() -> {
 config.reloadConfigs();
 ```
 
-**Auto-Defaults Merging:** Resource-Defaults werden automatisch mit User-Config gemergt.
+> **💡 Auto-Defaults Merging:** Resource-Defaults werden automatisch mit User-Config gemergt.
 
-### 🎨 **ItemBuilder** - Fluent Item Creation
+---
+
+### 🎨 ItemBuilder
+
+Fluent Item Creation mit Adventure Components.
 
 ```java
 ItemStack sword = new ItemBuilder(Material.DIAMOND_SWORD)
@@ -719,7 +726,9 @@ ItemStack skull = new ItemBuilder(Material.PLAYER_HEAD)
     .build();
 ```
 
-### 🛠️ **Utilities** - NitroUtils
+---
+
+### 🛠️ Utilities
 
 **Text:**
 ```java
@@ -763,7 +772,11 @@ int value = NitroUtils.clamp(100, 0, 50);           // 50
 int random = NitroUtils.randomBetween(1, 10);       // 1-10
 ```
 
-### 📊 **Player Management** - Auto-Persistierung
+---
+
+### 📊 Player Management
+
+Auto-Persistierung in die Datenbank.
 
 ```java
 @Inject
@@ -779,11 +792,13 @@ String primaryGroup = nPlayer.getPrimaryGroup();
 boolean hasPermission = nPlayer.hasPermission("nitrocore.admin");
 ```
 
-Player-Daten werden beim Quit automatisch in die Datenbank gespeichert.
+> **💡 Player-Daten werden beim Quit automatisch in die Datenbank gespeichert.**
 
-### 🎯 **Core Architecture**
+---
 
-- **IService Pattern** — Alle Services implementieren onEnable()/onDisable()
+### 🎯 Core Architecture
+
+- **IService Pattern** — Alle Services implementieren `onEnable()`/`onDisable()`
 - **Event Bus** — Loose Coupling zwischen Komponenten
 - **Thread Pool** — Separate IO und Compute Executors
 - **Performance Monitor** — SQL Query Tracking und Slow Query Detection
@@ -810,11 +825,11 @@ CREATE TABLE IF NOT EXISTS nitro_players (
 
 | Spalte | Typ | Beschreibung |
 |--------|-----|-------------|
-| `uuid` | CHAR(36) | Unique Player UUID (Primary Key) |
-| `name` | VARCHAR(16) | Aktueller Spieler-Name |
-| `first_join` | BIGINT | Timestamp des ersten Joins (ms seit Epoch) |
-| `last_join` | BIGINT | Timestamp des letzten Logins |
-| `created_at` | TIMESTAMP | Auto-gesetzt beim Erstellen |
+| `uuid` | `CHAR(36)` | Unique Player UUID (Primary Key) |
+| `name` | `VARCHAR(16)` | Aktueller Spieler-Name |
+| `first_join` | `BIGINT` | Timestamp des ersten Joins (ms seit Epoch) |
+| `last_join` | `BIGINT` | Timestamp des letzten Logins |
+| `created_at` | `TIMESTAMP` | Auto-gesetzt beim Erstellen |
 
 #### `schema_migrations` — Migration Tracking
 
@@ -826,7 +841,7 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-Wird automatisch von `MigrationRunner` erstellt und verwaltet.
+> **💡 Wird automatisch von `MigrationRunner` erstellt und verwaltet.**
 
 ---
 
@@ -841,7 +856,7 @@ SELECT uuid, name, first_join, last_join FROM nitro_players;
 SELECT * FROM nitro_players WHERE name = 'max';
 
 -- Neue Spieler (letzte 7 Tage)
-SELECT name FROM nitro_players 
+SELECT name FROM nitro_players
 WHERE first_join > UNIX_TIMESTAMP() * 1000 - (7 * 24 * 60 * 60 * 1000);
 
 -- Spieler die nie zurückkamen
@@ -855,7 +870,7 @@ SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) as 'MB'
 FROM information_schema.TABLES WHERE table_schema = 'nitrocore';
 
 -- Per Tabelle
-SELECT table_name, TABLE_ROWS, 
+SELECT table_name, TABLE_ROWS,
        ROUND((data_length + index_length) / 1024 / 1024, 2) AS 'MB'
 FROM information_schema.TABLES WHERE table_schema = 'nitrocore';
 
@@ -874,21 +889,21 @@ CREATE INDEX idx_last_join ON nitro_players(last_join DESC);
 
 ### Query Performance Tipps
 
-**Schnell** (< 10ms für 100k Zeilen):
-```java
-table.findById(uuid)                    // Primary Key
-table.findWhere("uuid", value)          // Indexed column
-```
+> **🚀 Schnell** (< 10ms für 100k Zeilen):
+> ```java
+> table.findById(uuid)                    // Primary Key
+> table.findWhere("uuid", value)          // Indexed column
+> ```
 
-**Mittelmäßig** (100-500ms):
-```java
-table.query().where("name LIKE ?", "%max%").mapToList(...)
-```
+> **⚡ Mittelmäßig** (100-500ms):
+> ```java
+> table.query().where("name LIKE ?", "%max%").mapToList(...)
+> ```
 
-**Langsam** (> 1s):
-```java
-table.query().where("name LIKE ?", "%a%").mapToList(...)  // Zu viele Matches
-```
+> **🐢 Langsam** (> 1s):
+> ```java
+> table.query().where("name LIKE ?", "%a%").mapToList(...)  // Zu viele Matches
+> ```
 
 ---
 
@@ -920,15 +935,15 @@ Cron-Job: `0 3 * * * /path/to/backup.sh`
 public class PlayerStats implements Saveable {
     private UUID uuid;
     private int kills;
-    
+
     @Override
     public Map<String, Object> toRow() {
         return Map.of("uuid", uuid.toString(), "kills", kills);
     }
-    
+
     @Override
     public String getPrimaryKeyColumn() { return "uuid"; }
-    
+
     @Override
     public Object getPrimaryKeyValue() { return uuid.toString(); }
 }
@@ -940,7 +955,7 @@ public class PlayerStats implements Saveable {
 table.save(new PlayerStats(uuid, 100));
 
 // SQL dahinter:
-// INSERT INTO player_stats VALUES (?, ?) 
+// INSERT INTO player_stats VALUES (?, ?)
 // ON DUPLICATE KEY UPDATE kills=VALUES(kills)
 ```
 
@@ -980,10 +995,12 @@ PlayerData data = cache.getOrLoad("player_" + uuid, uuid ->
 
 ## License
 
-Proprietary - Alle Rechte vorbehalten
+Proprietary — Alle Rechte vorbehalten
+
+<div align="center">
 
 **Version:** 1.0.0 | **Paper:** 1.21.1 | **Java:** 21+
 
----
-
 Made with ❤️ for Nitro Server Network
+
+</div>

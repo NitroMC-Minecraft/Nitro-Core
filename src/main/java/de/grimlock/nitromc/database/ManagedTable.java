@@ -23,6 +23,8 @@ public abstract class ManagedTable<T> extends Table {
 
     public abstract T mapRow(ResultSet rs) throws SQLException;
 
+    protected abstract Map<String, Object> toRow(T entity);
+
     public CompletableFuture<Void> createTableIfNotExists() {
         String ddl = schema.toCreateDdl();
         return databaseService.executeUpdateAsync(DatabasePriority.HIGH, ddl);
@@ -48,9 +50,8 @@ public abstract class ManagedTable<T> extends Table {
     }
 
     public CompletableFuture<Void> save(T entity) {
-        Saveable saveable = castSaveable(entity);
-        Map<String, Object> row = saveable.toRow();
-        String pkCol = saveable.getPrimaryKeyColumn();
+        Map<String, Object> row = toRow(entity);
+        String pkCol = schema.getPrimaryKeyColumn();
 
         String keys = String.join(", ", row.keySet().stream()
             .map(k -> "`" + k + "`")
@@ -119,12 +120,11 @@ public abstract class ManagedTable<T> extends Table {
             return CompletableFuture.completedFuture(null);
         }
 
-        Saveable firstSaveable = castSaveable(entities.get(0));
-        String pkCol = firstSaveable.getPrimaryKeyColumn();
+        String pkCol = schema.getPrimaryKeyColumn();
 
         List<Map<String, Object>> dataList = new ArrayList<>();
         for (T entity : entities) {
-            dataList.add(castSaveable(entity).toRow());
+            dataList.add(toRow(entity));
         }
 
         Map<String, Object> firstRow = dataList.get(0);
