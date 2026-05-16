@@ -38,7 +38,8 @@ dependencies {
 
 processResources {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    inputs.properties(project.properties)
+    inputs.properties(project.properties.findAll { it.value instanceof String || it.value instanceof Number || it.value instanceof Boolean })
+
     filesNotMatching("**/plugin.yml") {
         expand project.properties
     }
