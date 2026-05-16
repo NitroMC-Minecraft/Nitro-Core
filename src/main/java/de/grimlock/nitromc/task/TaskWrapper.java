@@ -30,8 +30,18 @@ public class TaskWrapper {
         return this;
     }
 
+    public TaskWrapper runLaterAsync(Runnable runnable, long delay) {
+        this.task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, runnable, delay);
+        return this;
+    }
+
     public TaskWrapper runTimerSync(Runnable runnable, long delay, long period) {
         this.task = Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period);
+        return this;
+    }
+
+    public TaskWrapper runTimerAsync(Runnable runnable, long delay, long period) {
+        this.task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, runnable, delay, period);
         return this;
     }
 

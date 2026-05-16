@@ -37,6 +37,10 @@ public class ConfigService implements IService {
         return configs.computeIfAbsent(name, n -> new ConfigFile(plugin, n));
     }
 
+    public void reloadConfigs() {
+        configs.values().forEach(ConfigFile::reload);
+    }
+
     public static class ConfigFile {
         private final File file;
         private FileConfiguration configuration;

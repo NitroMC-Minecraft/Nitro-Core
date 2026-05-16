@@ -27,13 +27,13 @@ public class EffectService implements IService {
     public void onDisable() {}
 
     public void playSoundAsync(Location location, Sound sound, float volume, float pitch) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        Bukkit.getScheduler().runTask(plugin, () -> {
             location.getWorld().playSound(location, sound, volume, pitch);
         });
     }
 
     public void spawnParticleAsync(Location location, Particle particle, int count) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        Bukkit.getScheduler().runTask(plugin, () -> {
             location.getWorld().spawnParticle(particle, location, count);
         });
     }

@@ -3,14 +3,14 @@ package de.grimlock.nitromc.service.impl;
 import de.grimlock.nitromc.service.IService;
 
 import javax.inject.Singleton;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 public class CooldownManager implements IService {
 
-    private final Map<String, Long> cooldowns = new HashMap<>();
+    private final Map<String, Long> cooldowns = new ConcurrentHashMap<>();
 
     @Override
     public void onEnable() {}

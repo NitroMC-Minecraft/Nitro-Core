@@ -9,10 +9,20 @@ public class NitroPlayer {
 
     private final Player player;
     private final LuckPermsService luckPermsService;
+    private final String name;
+    private final long firstJoin;
+    private final long lastJoin;
 
     public NitroPlayer(Player player, LuckPermsService luckPermsService) {
+        this(player, luckPermsService, player.getName(), System.currentTimeMillis(), System.currentTimeMillis());
+    }
+
+    public NitroPlayer(Player player, LuckPermsService luckPermsService, String name, long firstJoin, long lastJoin) {
         this.player = player;
         this.luckPermsService = luckPermsService;
+        this.name = name;
+        this.firstJoin = firstJoin;
+        this.lastJoin = lastJoin;
     }
 
     public Player getBukkitPlayer() {
@@ -24,7 +34,7 @@ public class NitroPlayer {
     }
 
     public String getName() {
-        return player.getName();
+        return name;
     }
 
     public String getPrimaryGroup() {
@@ -37,5 +47,13 @@ public class NitroPlayer {
 
     public void sendMessage(String message) {
         player.sendMessage(message);
+    }
+
+    public long getFirstJoin() {
+        return firstJoin;
+    }
+
+    public long getLastJoin() {
+        return lastJoin;
     }
 }
