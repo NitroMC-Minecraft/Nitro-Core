@@ -151,16 +151,25 @@ public abstract class ManagedTable<T> extends Table {
             try (var conn = databaseService.getConnection();
                  var stmt = conn.prepareStatement(sql)) {
 
-                for (Map<String, Object> row : dataList) {
-                    Object[] values = row.values().toArray();
-                    for (int i = 0; i < values.length; i++) {
-                        stmt.setObject(i + 1, values[i]);
+                conn.setAutoCommit(false);
+                try {
+                    for (Map<String, Object> row : dataList) {
+                        Object[] values = row.values().toArray();
+                        for (int i = 0; i < values.length; i++) {
+                            stmt.setObject(i + 1, values[i]);
+                        }
+                        stmt.addBatch();
                     }
-                    stmt.addBatch();
-                }
 
-                stmt.executeBatch();
-                databaseService.getPerformanceMonitor().record(sql, System.currentTimeMillis() - start);
+                    stmt.executeBatch();
+                    conn.commit();
+                    databaseService.getPerformanceMonitor().record(sql, System.currentTimeMillis() - start);
+                } catch (SQLException e) {
+                    conn.rollback();
+                    throw e;
+                } finally {
+                    conn.setAutoCommit(true);
+                }
             }
             return null;
         }).<Void>thenApply(v -> null).orTimeout(10, java.util.concurrent.TimeUnit.SECONDS);

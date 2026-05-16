@@ -49,6 +49,13 @@ public class NitroPlayerManager implements IService {
 
     @Override
     public void onDisable() {
+        for (NitroPlayer player : players.values()) {
+            long now = System.currentTimeMillis();
+            databaseService.executeUpdateAsync(DatabasePriority.MEDIUM,
+                "UPDATE nitro_players SET last_join = ? WHERE uuid = ?",
+                now, player.getUniqueId().toString()
+            ).join();
+        }
         players.clear();
     }
 

@@ -29,7 +29,6 @@ public class NitroCache implements IService {
     private final boolean statsEnabled;
 
     private final Map<String, Set<Consumer<String>>> channels = new ConcurrentHashMap<>();
-    private Consumer<CacheUpdate> writeBehindAction;
 
     @Inject
     public NitroCache() {
@@ -112,13 +111,6 @@ public class NitroCache implements IService {
         }
     }
 
-    @Deprecated
-    public void setWriteBehindAction(Consumer<CacheUpdate> action) {
-        if (action != null) {
-            addWriteBehindAction(entry -> action.accept(new CacheUpdate(entry.getKey(), entry.getValue())));
-        }
-    }
-
     public void addWriteBehindAction(Consumer<Map.Entry<String, Object>> action) {
         writeBehindActions.add(action);
     }
@@ -142,9 +134,9 @@ public class NitroCache implements IService {
         return val != null ? clazz.cast(val) : null;
     }
 
-    public <T> T getOrLoad(String key, Function<String, T> loader) {
+    public <T> T getOrLoad(String key, Class<T> type, Function<String, T> loader) {
         Object val = storage.get(key, k -> loader.apply(k));
-        return val != null ? (T) val : null;
+        return val != null ? type.cast(val) : null;
     }
 
     @SuppressWarnings("unchecked")
@@ -167,19 +159,13 @@ public class NitroCache implements IService {
             Map.Entry<String, Object> entry = Map.entry(key, value);
             writeBehindActions.forEach(action -> action.accept(entry));
         }
-        // Legacy support
-        if (writeBehindAction != null) {
-            writeBehindAction.accept(new CacheUpdate(key, value));
-        }
     }
 
     public long incr(String key) {
         Object val = storage.get(key, k -> new AtomicLong(0));
         if (val instanceof AtomicLong) {
             long newVal = ((AtomicLong) val).incrementAndGet();
-            if (writeBehindAction != null) {
-                writeBehindAction.accept(new CacheUpdate(key, newVal));
-            }
+            notifyWriteBehind(key, newVal);
             return newVal;
         }
         return -1;

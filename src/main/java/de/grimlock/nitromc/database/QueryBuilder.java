@@ -11,8 +11,7 @@ import java.util.stream.Collectors;
 public class QueryBuilder {
     private final DatabaseService databaseService;
     private final String tableName;
-    private final List<String> andWheres = new ArrayList<>();
-    private final List<String> orWheres = new ArrayList<>();
+    private final List<Clause> clauses = new ArrayList<>();
     private final List<Object> params = new ArrayList<>();
     private final List<String> joins = new ArrayList<>();
     private final List<String> orderBys = new ArrayList<>();
@@ -21,13 +20,15 @@ public class QueryBuilder {
     private Integer offsetVal = null;
     private DatabasePriority priority = DatabasePriority.MEDIUM;
 
+    private record Clause(String condition, boolean isOr) {}
+
     public QueryBuilder(DatabaseService databaseService, String tableName) {
         this.databaseService = databaseService;
         this.tableName = tableName;
     }
 
     public QueryBuilder where(String condition, Object... params) {
-        andWheres.add(condition);
+        clauses.add(new Clause(condition, false));
         for (Object param : params) {
             this.params.add(param);
         }
@@ -35,7 +36,7 @@ public class QueryBuilder {
     }
 
     public QueryBuilder orWhere(String condition, Object... params) {
-        orWheres.add(condition);
+        clauses.add(new Clause(condition, true));
         for (Object param : params) {
             this.params.add(param);
         }
@@ -155,20 +156,33 @@ public class QueryBuilder {
             sb.append(" ").append(join);
         }
 
-        if (!andWheres.isEmpty() || !orWheres.isEmpty()) {
+        if (!clauses.isEmpty()) {
             sb.append(" WHERE ");
 
-            if (!andWheres.isEmpty()) {
-                String andClause = andWheres.stream()
-                    .collect(Collectors.joining(" AND "));
-                sb.append("(").append(andClause).append(")");
+            boolean firstAnd = true;
+            boolean hasAnd = clauses.stream().anyMatch(c -> !c.isOr());
+
+            if (hasAnd) {
+                sb.append("(");
+                for (Clause clause : clauses) {
+                    if (!clause.isOr()) {
+                        if (!firstAnd) sb.append(" AND ");
+                        sb.append(clause.condition());
+                        firstAnd = false;
+                    }
+                }
+                sb.append(")");
             }
 
-            for (String orWhere : orWheres) {
-                if (!andWheres.isEmpty() || orWheres.indexOf(orWhere) > 0) {
-                    sb.append(" OR ");
+            for (Clause clause : clauses) {
+                if (clause.isOr()) {
+                    if (hasAnd || !clauses.stream().limit(clauses.indexOf(clause)).anyMatch(c -> c.isOr())) {
+                        sb.append(" OR ");
+                    } else if (clauses.stream().limit(clauses.indexOf(clause)).anyMatch(c -> c.isOr())) {
+                        sb.append(" OR ");
+                    }
+                    sb.append(clause.condition());
                 }
-                sb.append(orWhere);
             }
         }
 
@@ -184,5 +198,9 @@ public class QueryBuilder {
         }
 
         return sb.toString();
+    }
+
+    private int indexOf(Clause clause) {
+        return clauses.indexOf(clause);
     }
 }

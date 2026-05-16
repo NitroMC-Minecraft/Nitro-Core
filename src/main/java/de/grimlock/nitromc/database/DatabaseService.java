@@ -61,7 +61,12 @@ public class DatabaseService implements IService {
         hikariConfig.setPassword(config.getString("password"));
         hikariConfig.setDriverClassName("org.mariadb.jdbc.Driver");
         hikariConfig.setMaximumPoolSize(10);
-        
+        hikariConfig.setMinimumIdle(2);
+        hikariConfig.setConnectionTimeout(10_000);
+        hikariConfig.setIdleTimeout(600_000);
+        hikariConfig.setMaxLifetime(1_800_000);
+        hikariConfig.setKeepaliveTime(60_000);
+
         this.dataSource = new HikariDataSource(hikariConfig);
         this.taskQueue = new PriorityBlockingQueue<>();
 
@@ -69,41 +74,43 @@ public class DatabaseService implements IService {
     }
 
     private void startWorker() {
-        threadingService.getIoExecutor().submit(() -> {
-            while (running) {
-                try {
-                    DatabaseTask<?> task = taskQueue.poll(500, TimeUnit.MILLISECONDS);
-                    if (task != null) {
-                        if (circuitOpen.get()) {
-                            task.getFuture().completeExceptionally(new RuntimeException("Database Circuit is OPEN"));
-                            continue;
+        int workers = Math.min(4, 10);
+        for (int i = 0; i < workers; i++) {
+            threadingService.getIoExecutor().submit(() -> {
+                while (running) {
+                    try {
+                        DatabaseTask<?> task = taskQueue.poll(500, TimeUnit.MILLISECONDS);
+                        if (task != null) {
+                            if (circuitOpen.get()) {
+                                task.getFuture().completeExceptionally(new RuntimeException("Database Circuit is OPEN"));
+                                continue;
+                            }
+                            task.execute();
+                            failureCount.set(0);
                         }
-                        task.execute();
-                        failureCount.set(0); // Reset on success
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    } catch (Exception e) {
+                        handleFailure();
                     }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                } catch (Exception e) {
-                    handleFailure();
                 }
-            }
-        });
+            });
+        }
     }
 
     private void handleFailure() {
         if (failureCount.incrementAndGet() >= FAILURE_THRESHOLD) {
             this.circuitOpen.set(true);
             eventBus.post(new DatabaseFailureEvent(true));
-            // Schedule a reset check
-            threadingService.getComputeExecutor().submit(() -> {
-                try {
-                    Thread.sleep(30_000); // Wait 30s
+            threadingService.getScheduler().schedule(
+                () -> {
                     this.circuitOpen.set(false);
                     this.failureCount.set(0);
                     eventBus.post(new DatabaseFailureEvent(false));
-                } catch (InterruptedException ignored) {}
-            });
+                },
+                30, TimeUnit.SECONDS
+            );
         }
     }
 

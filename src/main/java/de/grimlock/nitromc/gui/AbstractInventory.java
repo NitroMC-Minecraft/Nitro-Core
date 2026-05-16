@@ -16,11 +16,14 @@ import java.util.function.Consumer;
 public abstract class AbstractInventory implements InventoryHolder {
 
     protected final Inventory inventory;
-    private final Map<Integer, Consumer<InventoryClickEvent>> actions = new HashMap<>();
+    protected final Map<Integer, Consumer<InventoryClickEvent>> actions = new HashMap<>();
 
     public AbstractInventory(int size, Component title) {
         this.inventory = Bukkit.createInventory(this, size, title);
+        populate();
     }
+
+    protected abstract void populate();
 
     public void setItem(int slot, ItemStack item, Consumer<InventoryClickEvent> action) {
         inventory.setItem(slot, item);
@@ -35,6 +38,12 @@ public abstract class AbstractInventory implements InventoryHolder {
         if (action != null) {
             action.accept(event);
         }
+    }
+
+    public void refresh() {
+        inventory.clear();
+        actions.clear();
+        populate();
     }
 
     public void open(Player player) {
