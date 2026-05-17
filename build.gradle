@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'com.gradleup.shadow' version '8.3.0'
 }
 
 group = 'de.grimlock.nitromc'
@@ -57,10 +58,17 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+shadowJar {
+    archiveClassifier.set('')
+}
+
+build.dependsOn shadowJar
+
 publishing {
     publications {
         gpr(MavenPublication) {
-            from components.java
+            artifact shadowJar
+
             artifactId = 'nitro-core'
 
             pom {
