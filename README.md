@@ -18,6 +18,7 @@
 ## 📑 Inhaltsverzeichnis
 
 - [Installation](#installation)
+- [Als Dependency einbinden](#als-dependency-einbinden)
 - [Quick Start - Neue Tabelle in 2 Minuten](#quick-start---neue-tabelle-in-2-minuten)
 - [Neue Tabelle im Real-World Beispiel](#neue-tabelle-im-real-world-beispiel)
 - [So einfach ist es!](#so-einfach-ist-es)
@@ -89,6 +90,67 @@ java -Xmx1024M -Xms1024M -jar paper-1.21.1-xxx.jar nogui
 ```
 
 > **✅ Das Plugin erstellt automatisch alle notwendigen Tabellen beim Startup.**
+
+---
+
+## Als Dependency einbinden
+
+NitroCore ist als Paket auf GitHub Packages verfügbar und kann direkt in andere Plugins oder Projekte eingebunden werden.
+
+### Gradle (Groovy DSL)
+
+```groovy
+repositories {
+    mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/nitromc-minecraft/nitro-core")
+        credentials {
+            username = System.getenv("USERNAME") // Dein GitHub-Nutzername
+            password = System.getenv("TOKEN")    // Dein ghp_ Classic Token
+        }
+    }
+}
+
+dependencies {
+    implementation "de.grimlock.nitromc:nitro-core:1.0.0"
+}
+```
+
+### Maven
+
+```xml
+<repositories>
+    <repository>
+        <id>github</id>
+        <url>https://maven.pkg.github.com/nitromc-minecraft/nitro-core</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>de.grimlock.nitromc</groupId>
+        <artifactId>nitro-core</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+</dependencies>
+```
+
+> **⚠️ Wichtig für Maven-Nutzer:** Damit Maven auf das GitHub Package zugreifen kann, müssen die Credentials lokal in `~/.m2/settings.xml` hinterlegt sein:
+>
+> ```xml
+> <settings>
+>   <servers>
+>     <server>
+>       <id>github</id>
+>       <username>DEIN_GITHUB_NUTZERNAME</username>
+>       <password>DEIN_GHP_TOKEN</password>
+>     </server>
+>   </servers>
+> </settings>
+> ```
+
+> **💡 Token erstellen:** GitHub → Settings → Developer settings → Personal access tokens → Classic → `read:packages` Berechtigung auswählen.
 
 ---
 
