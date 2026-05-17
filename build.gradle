@@ -61,10 +61,10 @@ publishing {
     publications {
         gpr(MavenPublication) {
             from components.java
+            artifactId = 'nitro-core'
 
-            // Behebt den Fehler 422: GitHub erzwingt die Verknüpfung zum Repository in den POM-Metadaten
             pom {
-                name = 'Nitro-Core'
+                name = 'nitro-core'
                 description = 'NitroMC Core System'
                 url = 'https://github.com/nitromc-minecraft/nitro-core'
                 scm {
